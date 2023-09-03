@@ -1,6 +1,31 @@
 use serde::Deserialize;
+use std::{error::Error, fmt::Display, string::ToString};
+use strum::IntoEnumIterator;
+use strum_macros::{Display, EnumIter, EnumString};
 
 const BORED_API_URL: &str = "http://www.boredapi.com/api/activity/";
+
+#[derive(Debug, EnumIter, Display, EnumString)]
+pub enum ActivityType {
+    Education,
+    Recreational,
+    Social,
+    Diy,
+    Charity,
+    Cooking,
+    Relaxation,
+    Music,
+    Busywork,
+}
+
+impl ActivityType {
+    pub fn get_all(&self) -> String {
+        ActivityType::iter()
+            .map(|activity_type| activity_type.to_string())
+            .collect::<Vec<String>>()
+            .join("\n")
+    }
+}
 
 #[derive(Deserialize, Debug)]
 pub struct BoredActivity {
@@ -14,13 +39,28 @@ pub struct BoredActivity {
     // key: String,
 }
 
-impl BoredActivity {
-    pub async fn get_random() -> Result<Self, reqwest::Error> {
-        let activity = reqwest::get(BORED_API_URL).await?.json::<Self>().await?;
-        Ok(activity)
-    }
+#[derive(Debug)]
+pub struct ActivityTypeNotFound;
 
-    pub fn get_pretty(&self) -> String {
+impl Display for ActivityTypeNotFound {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Activity type not found")
+    }
+}
+impl Error for ActivityTypeNotFound {}
+
+#[derive(Debug)]
+pub struct ActivityNotFound;
+
+impl Display for ActivityNotFound {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Activity not found")
+    }
+}
+impl Error for ActivityNotFound {}
+
+impl BoredActivity {
+    pub fn get_pretty_msg(&self) -> String {
         format!(
             "Activity: {}\nType: {}\nParticipants: {}\nPrice: {}\nAccessibility: {}\nLink: {}",
             self.activity,
@@ -31,4 +71,33 @@ impl BoredActivity {
             self.link.as_ref().unwrap_or(&"None".to_string())
         )
     }
+}
+
+async fn do_request(url: &str) -> Result<BoredActivity, reqwest::Error> {
+    let resp = reqwest::get(url).await?;
+    debug!("Bored API response status: {:?}", resp.status());
+    let activity = resp.json::<BoredActivity>().await?;
+    Ok(activity)
+}
+pub async fn get_random() -> Result<BoredActivity, reqwest::Error> {
+    do_request(BORED_API_URL).await
+}
+
+pub async fn get_by_type(activity_type: ActivityType) -> Result<BoredActivity, reqwest::Error> {
+    let url = format!(
+        "{}?type={}",
+        BORED_API_URL,
+        activity_type.to_string().to_lowercase()
+    );
+    do_request(&url).await
+}
+
+pub async fn get_by_participants(participants: u8) -> Result<BoredActivity, reqwest::Error> {
+    let url = format!("{}?participants={}", BORED_API_URL, participants);
+    do_request(&url).await
+}
+
+pub async fn get_by_price(price: f32) -> Result<BoredActivity, reqwest::Error> {
+    let url = format!("{}?price={}", BORED_API_URL, price);
+    do_request(&url).await
 }

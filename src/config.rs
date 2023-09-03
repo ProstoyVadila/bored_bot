@@ -6,6 +6,7 @@ use std::env;
 pub struct Config {
     pub token: String,
     pub api_url: String,
+    pub admin_id: String,
 }
 
 impl Config {
@@ -14,6 +15,7 @@ impl Config {
         Config {
             token: env::var("TOKEN").expect("TOKEN must be set"),
             api_url: env::var("API_URL").expect("API_URL must be set"),
+            admin_id: env::var("ADMIN_ID").expect("ADMIN_ID must be set"),
         }
     }
 }

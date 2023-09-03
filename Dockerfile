@@ -16,6 +16,5 @@ FROM alpine:3.17
 RUN apk add --no-cache libgcc
 # copy the binary into the final image
 COPY --from=builder /app/target/release/mr_bored_bot .
-COPY --from=builder /app/.env .
 # set the binary as entrypoint
 ENTRYPOINT ["/mr_bored_bot"]
