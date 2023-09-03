@@ -1,2 +1,5 @@
+example.env
+README.md
+.gitignore
 Dockerfile
 target/
