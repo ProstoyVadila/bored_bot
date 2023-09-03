@@ -1,9 +1,9 @@
 use serde::Deserialize;
-use std::{error::Error, fmt::Display, string::ToString};
+use std::string::ToString;
 use strum::IntoEnumIterator;
 use strum_macros::{Display, EnumIter, EnumString};
 
-const BORED_API_URL: &str = "http://www.boredapi.com/api/activity/";
+const BORED_API_URL: &str = "https://www.boredapi.com/api/activity";
 
 #[derive(Debug, EnumIter, Display, EnumString)]
 pub enum ActivityType {
@@ -38,26 +38,6 @@ pub struct BoredActivity {
     accessibility: f32,
     // key: String,
 }
-
-#[derive(Debug)]
-pub struct ActivityTypeNotFound;
-
-impl Display for ActivityTypeNotFound {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Activity type not found")
-    }
-}
-impl Error for ActivityTypeNotFound {}
-
-#[derive(Debug)]
-pub struct ActivityNotFound;
-
-impl Display for ActivityNotFound {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Activity not found")
-    }
-}
-impl Error for ActivityNotFound {}
 
 impl BoredActivity {
     pub fn get_pretty_msg(&self) -> String {

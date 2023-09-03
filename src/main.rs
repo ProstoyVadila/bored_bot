@@ -12,10 +12,13 @@ mod utils;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     pretty_env_logger::init();
+
     info!("Getting config...");
     let config = config::Config::new();
 
     info!("Starting mr bored_bot...");
     bot::run(config).await?;
+    
+    info!("Bored Bot is stopped");
     Ok(())
 }
